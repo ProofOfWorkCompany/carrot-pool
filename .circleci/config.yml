@@ -14,7 +14,7 @@ jobs:
             #command: NODE_ENV=test npm test
       - run:
           name: Build docker image
-          command: docker build -t proofofwork/pool.paypow.com:$CIRCLE_BRANCH . 
+          command: docker build -t proofofwork/pool.pow.co:$CIRCLE_BRANCH . 
       - run:
           name: Push to Docker Hub
           command: |
