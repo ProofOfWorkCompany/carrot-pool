@@ -1,9 +1,8 @@
 const { requireDeps } = require('../utils/require_deps');
 
 const defaultDeps = [
-  ['dupsInvalidator', `${__dirname}/dups_invalidator`],
-  ['getWorkersRounds', `${__dirname}/get_workers_rounds`],
-  ['validateTransactions', `${__dirname}/validate_transactions`],
+  ['initializePayouts', `${__dirname}/initialize_payouts`],
+  ['updateRounds', `${__dirname}/update_rounds`],
   ['processShareBlocks', `${__dirname}/process_share_blocks`],
   ['calculatePayments', `${__dirname}/calculate_payments`],
   ['manageSentPayments', `${__dirname}/manage_sent_payments`],
@@ -13,27 +12,16 @@ const defaultDeps = [
 // Periodic background process that processes all share and worker data
 // to determine payment amounts and produce payout transactions for the
 // blockchain.
-const baseProcessPayments = (deps) => (env) => (paymentMode, lastInterval) => {
-  const { dupsInvalidator,
-    getWorkersRounds,
-    validateTransactions,
-    processShareBlocks,
-    calculatePayments,
-    manageSentPayments,
-    fixFailedPayments } = deps;
+const baseProcessPayments = (deps) => (env) => async (paymentMode, lastInterval) => {
+  const { initializePayouts, updateRounds, processShareBlocks } = deps;
+  const { calculatePayments, manageSentPayments, fixFailedPayments } = deps;
 
-  const subEnv = {
-    ...env,
-    paymentMode,
-    lastInterval,
-    // TODO: Move to get_workers_rounds.js when we can access defaultDeps
-    invalidateDups: dupsInvalidator(env)
-  };
+  const subEnv = { ...env, paymentMode, lastInterval };
 
-  return getWorkersRounds(subEnv)
-    .then(validateTransactions(subEnv))
-    .then(processShareBlocks(subEnv))
-    .then(calculatePayments(subEnv))
+  const { workers, rounds } = await initializePayouts(subEnv);
+  await updateRounds(subEnv)(rounds);
+  await processShareBlocks(subEnv)({ workers, rounds });
+  return calculatePayments(subEnv)({ workers, rounds })
     .then(manageSentPayments(subEnv))
     .then(fixFailedPayments(subEnv));
 };
