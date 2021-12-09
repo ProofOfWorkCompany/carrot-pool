@@ -9,9 +9,9 @@ jobs:
       - run:
           name: Install Dependencies
           command: npm install
-      - run:
-          name: Run Tests
-          command: NODE_ENV=test npm test
+            #      - run:
+            #name: Run Tests
+            #command: NODE_ENV=test npm test
       - run:
           name: Build docker image
           command: docker build -t proofofwork/pool.paypow.com:$CIRCLE_BRANCH . 
