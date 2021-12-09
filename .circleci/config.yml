@@ -27,7 +27,7 @@ jobs:
     steps:
       - run:
           name: Chef Client Update Live Container
-          command: ssh ubuntu@poolpow.co "sudo chef-client -o recipe[pool.pow.co::carrot_pool]"
+          command: ssh ubuntu@pool.pow.co "sudo chef-client -o recipe[pool.pow.co::carrot_pool]"
 
 
 workflows:
