@@ -22,16 +22,15 @@ const _initPayments = (deps) => (env) => {
   const daemon = new Daemon({ configs: [daemonConfig], logger });
 
   return daemon.isValidAddress(address).then((isValid) => {
-    // If validating our wallet address fails, exit payment setup. Log the invalid
-    // address and exit without enabling processPayments.
+    // If validating our wallet address fails, log the invalid
+    // address and warn the user.
     if (!isValid) {
-      const msg = `initPayments: invalid pool address "${address}" - payment processing disabled`;
-      logger.error(msg);
-      return false;
+      const msg = `initPayments: Could not validate pool address "${address}" - Ensure the pool owns this address!`;
+      logger.warning(msg);
     }
 
     const coin = poolConfig.coin.name;
-    const client = new Redis(portalConfig.redis);
+    const redis = new Redis(portalConfig.redis);
     const coinPrecision = poolConfig.satoshiPrecision || 8;
     const magnitude = 10 ** coinPrecision;
     const minPaymentSatoshis = minimumPayment * magnitude;
@@ -39,7 +38,7 @@ const _initPayments = (deps) => (env) => {
     const startEnv = {
       logger,
       coin,
-      client,
+      client: redis.client,
       daemon,
       coinUtils,
       // Todo: poolOptions is a holdover from multi-coin days. This should be poolConfig,

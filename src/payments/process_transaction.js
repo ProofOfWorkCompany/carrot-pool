@@ -17,7 +17,7 @@ const isTxInvalid = (tx, round, logger) => {
 // Callback function, for the transactions.forEach() step in validateTransactions.
 // Ensures the transaction details are valid, and sets the corresponding round
 // confirmations, and category fields.
-const processTransaction = ({ rounds, coinsRound, logger, poolOptions }) => (
+const processTransaction = ({ rounds, coinUtils, logger, poolOptions }) => (
   (tx, idx) => {
     const round = rounds[idx];
     // Update Confirmations
@@ -38,9 +38,10 @@ const processTransaction = ({ rounds, coinsRound, logger, poolOptions }) => (
     }
 
     // Update Round Category/Reward
+    // NOTE: round.reward is in units of COINS
     round.category = detailForAddr.category;
     if ((round.category === 'generate') || (round.category === 'immature')) {
-      round.reward = coinsRound(parseFloat(detailForAddr.amount || detailForAddr.value));
+      round.reward = coinUtils.coinsRound(parseFloat(detailForAddr.amount || detailForAddr.value));
     }
   }
 );

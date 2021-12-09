@@ -16,10 +16,10 @@ const loadConfigJson = (name, env) => {
 };
 
 const portalConfig = loadConfigJson('server_config.json', process.env.SERVER_CONFIG_PATH);
-const poolConfig = loadConfigJson('pool_config.json', process.env.POOL_CONFIG_PATH);
 const baseLogger = new PoolLogger(portalConfig);
 
-finalizePoolConfig({ poolConfig, baseLogger });
+let poolConfig = loadConfigJson('pool_config.json', process.env.POOL_CONFIG_PATH);
+poolConfig = finalizePoolConfig({ portalConfig, poolConfig, baseLogger });
 
 // Ensure our process has an expanded file handle limit.
 setPosixLimit({ baseLogger, isMaster: cluster.isMaster });
