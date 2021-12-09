@@ -10,28 +10,24 @@ jobs:
           name: Install Dependencies
           command: npm install
       - run:
-          name: Migrate Database
-          command: npm run db:migrate
-      #- run:
-          #name: Sync Egifter Catalog and Other Test Database Seeding
-          #command: npm run db:seed
-      - run:
           name: Run Tests
           command: NODE_ENV=test npm test
       - run:
           name: Build docker image
-          command: docker build -t anypay/pool.paypow.com . 
+          command: docker build -t proofofwork/pool.paypow.com:$CIRCLE_BRANCH . 
       - run:
           name: Push to Docker Hub
           command: |
-            ./push_to_docker.sh
+            docker login --username $DOCKER_USER --password $DOCKER_PASSWORD 
+            docker push proofofwork/pool.pow.co:$CIRCLE_BRANCH
+
   deploy:
     machine:
       image: ubuntu-1604:202007-01
     steps:
       - run:
           name: Chef Client Update Live Container
-          command: ssh ubuntu@paypow.com "sudo chef-client -o recipe[pool.paypow.com]"
+          command: ssh ubuntu@poolpow.co "sudo chef-client -o recipe[pool.pow.co::carrot_pool]"
 
 
 workflows:
